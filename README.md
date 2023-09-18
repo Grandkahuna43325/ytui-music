@@ -74,6 +74,9 @@ cargo build --all --release
 ```
 
 4) The compiled binary is located in `target/release/` directory. Copy the `ytui_music` binary and place it somewhere where it is easy to run. Preferrably under `$PATH`.
+```
+sudo update-alternatives --install /usr/local/bin/ytui_music ytui_music $PWD/target/release/ytui_music 1
+```
 
 5) Ytui-music is now ready to fire. [Head over to usage](#usage)
 
