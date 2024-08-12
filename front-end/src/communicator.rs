@@ -4,10 +4,12 @@ use crate::ui::{
 };
 use std::sync::{Arc, Condvar, Mutex};
 
+///response is Music||Artist||Playlist Unit
+///target is (Vec<Music||Artist||Playlist>, TableState)
 macro_rules! handle_response {
     ($response: expr, $state_original: expr, $win_index: expr, $target: ident) => {{
         let mut state = $state_original.lock().unwrap();
-        // return the boolean which is only truw when response is RETRY
+        // return the boolean which is only true when response is RETRY
         let mut need_retry = false;
         match $response {
             Ok(mut data) => {
@@ -19,6 +21,7 @@ macro_rules! handle_response {
                 match e {
                     fetcher::ReturnAction::Failed => {
                         state.status = "Fetch error..";
+
                     }
                     fetcher::ReturnAction::EOR => {
                         state.status = "Result end..";

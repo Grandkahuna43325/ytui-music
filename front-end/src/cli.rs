@@ -50,7 +50,7 @@ __   ___         _                           _
 "##;
         let author = env!(
             "CARGO_PKG_AUTHORS",
-            "Sudip Ghimire <sudipghimire533@gmail.com>"
+            "Grandkahuna43325"
         );
         println!("{}\nAuthor(s): {}\n", ascii_art, author);
 
