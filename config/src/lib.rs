@@ -66,6 +66,7 @@ pub struct ShortcutsKeys {
     pub favourates_remove: char,
     pub vol_increase: char,
     pub vol_decrease: char,
+    pub hide_popup: char,
 }
 
 impl Default for ShortcutsKeys {
@@ -134,6 +135,9 @@ impl Default for ShortcutsKeys {
 
             // Same as vol_increase but decrease the volume
             vol_decrease: '-',
+
+            // Quit the popup window
+            hide_popup: 'q',
         }
     }
 }

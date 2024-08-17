@@ -8,7 +8,7 @@ Listen to music from youtube inside terminal with sleek tui
 ---
 
 # Installation
-1) Download latest binary from [release page](https://github.com/sudipghimire533/ytui-music/releases/latest).
+1) Download latest binary from [release page](https://github.com/grandkahuna43325/ytui-music/releases/latest).
 If binary is not available for your platform, head on to [build from source](#building-from-source)
 
 2) Give it executable permission and from downloaded directory, in shell:
@@ -39,6 +39,12 @@ brew install mpv youtube-dl
 sudo apt update -y
 sudo apt install -y youtube-dl libmpv1 libmpv-dev
 ```
+
+### - Arch 
+```
+sudo pacman -S mpv libmpv
+yay -S yt-dlp
+```
 **For other distributions, install youtube-dl and mpv packages in your preferred methods**
 
 ---
@@ -65,7 +71,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 2) Get the source code. You can [download from the archives]() or use git clone:
 ```
-git clone git@github.com:sudipghimire533/ytui-music
+git clone git@github.com:grandkahuna43325/ytui-music
 ```
 
 3) `cd` into source root and do:
@@ -139,6 +145,13 @@ ytui_music infor version
     - Favorite music are shown in `Liked` section in sidebar
     - Favorite playlists are shown in `My playlist` section in sidebar
     - Favorite artists are shown in `Following` section in sidebar
+
+---
+
+#TODO & known errors:
+1) moving from tui to ratatui(why do I torture myself with this?)
+2) searching "music:the title" gives error(because of the space I think?)
+3) vim keybindings as default
 
 ---
 

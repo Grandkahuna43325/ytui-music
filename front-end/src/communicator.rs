@@ -1,6 +1,6 @@
 use crate::ui::{
     self,
-    event::{MIDDLE_ARTIST_INDEX, MIDDLE_MUSIC_INDEX, MIDDLE_PLAYLIST_INDEX},
+    event::{MIDDLE_ARTIST_INDEX, MIDDLE_MUSIC_INDEX, MIDDLE_PLAYLIST_INDEX}, Status,
 };
 use std::sync::{Arc, Condvar, Mutex};
 
@@ -13,18 +13,18 @@ macro_rules! handle_response {
         let mut need_retry = false;
         match $response {
             Ok(mut data) => {
-                state.status = "Success..";
+                state.status = Status::Ok("Success..");
                 data.shrink_to_fit();
                 state.$target.0 = data;
             }
             Err(e) => {
                 match e {
-                    fetcher::ReturnAction::Failed => {
-                        state.status = "Fetch error..";
+                    fetcher::ReturnAction::Failed(err) => {
+                        state.status = Status::Error(("Fetch error..", err));
 
                     }
                     fetcher::ReturnAction::EOR => {
-                        state.status = "Result end..";
+                        state.status = Status::Error(("Result end..", None));
                         // TODO: Setting this to None means that the next page will always be 0.
                         // That being said when user tries to navigate to previous page after seeing
                         // EOR then still the fetched page will be 0. i.e again started from beginning.
@@ -47,7 +47,7 @@ macro_rules! handle_response {
                     fetcher::ReturnAction::Retry => {
                         // the respective function from which the data is exptracted
                         // specify the no of times to retry. Simple rerun the loop if retry is feasible
-                        state.status = "Retrying..";
+                        state.status = Status::Ok("Retrying..");
                         need_retry = true;
                     }
                 }
@@ -112,7 +112,7 @@ pub async fn communicator<'st, 'nt>(
             // clear the target so that noone gets confused if it the response from previous or
             // current request
             state.playlistbar.0.clear();
-            state.status = "Fetch playlist..";
+            state.status = Status::Error(("Fetch playlist..", None));
 
             notifier.notify_one();
 
@@ -180,7 +180,7 @@ pub async fn communicator<'st, 'nt>(
                 && state.fetched_page[MIDDLE_ARTIST_INDEX].is_some())
         {
             state.artistbar.0.clear();
-            state.status = "Fetch artists..";
+            state.status = Status::Ok("Fetch artists..");
             notifier.notify_one();
 
             let page = state.fetched_page[MIDDLE_ARTIST_INDEX].unwrap();
@@ -223,7 +223,7 @@ pub async fn communicator<'st, 'nt>(
                 && state.fetched_page[MIDDLE_MUSIC_INDEX].is_some())
         {
             state.musicbar.0.clear();
-            state.status = "Fetch music..";
+            state.status = Status::Ok("Fetch music..");
             notifier.notify_one();
 
             let page = state.fetched_page[MIDDLE_MUSIC_INDEX].unwrap();

@@ -1,4 +1,4 @@
-name: Release ytui-music v2.0.0-beta
+name: Release ytui-music v2.0.1-beta
 
 on:
   push:

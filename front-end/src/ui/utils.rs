@@ -17,11 +17,29 @@ use config::initilize::{
     CONFIG, STORAGE, TB_FAVOURATES_ARTIST, TB_FAVOURATES_MUSIC, TB_FAVOURATES_PLAYLIST,
 };
 
+use super::Status;
+
 pub fn show_pupop_text<'a, B>(frame: &mut tui::terminal::Frame<B>, text: [&'a str; 2], area: &Rect)
 where
     B: Backend,
 {
     let block = Block::active(text[0].to_string());
+    let text = Span::raw(text[1]);
+    let paragraph = Paragraph::new(text)
+        .alignment(Alignment::Center)
+        .wrap(widgets::Wrap { trim: true })
+        .block(block);
+
+    frame.render_widget(widgets::Clear, *area);
+    frame.render_widget(paragraph, *area);
+}
+
+pub fn show_popup<'a, B>(frame: &mut tui::terminal::Frame<B>, text: [&'a str; 2], area: &Rect)
+where
+    B: Backend,
+{
+    let title = format!("{}, press 'q' to exit", text[0]);
+    let block = Block::active(title);
     let text = Span::raw(text[1]);
     let paragraph = Paragraph::new(text)
         .alignment(Alignment::Center)
@@ -58,7 +76,7 @@ impl<'parent> ui::TopLayout {
 
     pub fn get_statusbox(state: &'parent ui::State) -> Paragraph<'parent> {
         Paragraph::new(Span::styled(
-            state.status,
+            state.status.clone(),
             Style::default()
                 .add_modifier(Modifier::BOLD | Modifier::ITALIC)
                 .fg(rgb!(CONFIG.theme.color_secondary)),
@@ -513,7 +531,9 @@ impl Default for ui::State<'_> {
         let mut sidebar_list_state = ListState::default();
         sidebar_list_state.select(Some(0));
         ui::State {
-            status: "@sudipghimire533",
+            status: Status::Ok("@grandkahuna43325"),
+            previous_error: None,
+            hide_popup: false,
             sidebar: sidebar_list_state,
             musicbar: (Vec::new(), TableState::default()),
             playlistbar: (Vec::new(), TableState::default()),
@@ -650,12 +670,12 @@ impl ui::State<'_> {
                 self.bottom.music_duration = Duration::from_secs(0);
                 self.bottom.music_elapse = Duration::from_secs(0);
 
-                self.status = "Playing...";
+                self.status = Status::Ok("Playing...");
                 // set currently playing (unpaused) to ture. no need to set real title as it will
                 // be done by refresh_mpv_status() later on
                 self.bottom.playing = Some((String::new(), true))
             }
-            Err(_) => self.status = "Playback error..",
+            Err(err) => self.status = Status::Error(("Playback error..", Some(err.to_string()))),
         }
         // Now as the selection is being played. Add remaining item from musicbar to the play
         // queue.
@@ -692,12 +712,12 @@ impl ui::State<'_> {
                 self.bottom.music_duration = Duration::from_secs(0);
                 self.bottom.music_elapse = Duration::from_secs(0);
 
-                self.status = "Playing..";
+                self.status = Status::Ok("Playing..");
                 // set currently playing (unpaused) to ture. no need to set real title as it will
                 // be done by refresh_mpv_status() later on
                 self.bottom.playing = Some((String::new(), true));
             }
-            Err(_) => self.status = "Playback error..",
+            Err(err) => self.status = Status::Error(("Playback error..", Some(err.to_string()))),
         }
     }
 
@@ -745,10 +765,10 @@ impl ui::State<'_> {
     pub fn toggle_pause(&mut self) {
         if let Some((_, ref mut is_playing)) = self.bottom.playing {
             if *is_playing {
-                self.status = "Paused..";
+                self.status = Status::Ok("Paused..");
                 self.player.pause().unwrap();
             } else {
-                self.status = "Playing..";
+                self.status = Status::Ok("Playing..");
                 self.player.unpause().unwrap();
             }
             *is_playing = !*is_playing;
@@ -770,10 +790,13 @@ impl ui::State<'_> {
         let args = [(":id", &music.id)];
 
         let res = STORAGE.lock().unwrap().execute(&query, &args);
-        if res.is_ok() {
-            self.status = "Removed..";
-        } else {
-            self.status = "Err removing..";
+        match res {
+            Ok(_) => {
+                self.status = Status::Ok("Removed..");
+            }
+            Err(err) => {
+                self.status = Status::Error(("Err removing..", Some(err.to_string())));
+            }
         }
     }
 
@@ -789,10 +812,13 @@ impl ui::State<'_> {
         let args = [(":id", &playlist.id)];
 
         let res = STORAGE.lock().unwrap().execute(&query, &args);
-        if res.is_ok() {
-            self.status = "Removed..";
-        } else {
-            self.status = "Err removing..";
+        match res {
+            Ok(_) => {
+                self.status = Status::Ok("Removed..");
+            }
+            Err(err) => {
+                self.status = Status::Error(("Err removing..", Some(err.to_string())));
+            }
         }
     }
 
@@ -809,10 +835,13 @@ impl ui::State<'_> {
         let args = [(":id", &artist.id)];
 
         let res = STORAGE.lock().unwrap().execute(&query, &args);
-        if res.is_ok() {
-            self.status = "Removed..."
-        } else {
-            self.status = "Err removing..";
+        match res {
+            Ok(_) => {
+                self.status = Status::Ok("Removed..");
+            }
+            Err(err) => {
+                self.status = Status::Error(("Err removing..", Some(err.to_string())));
+            }
         }
     }
 
@@ -835,10 +864,13 @@ impl ui::State<'_> {
         ];
 
         let res = STORAGE.lock().unwrap().execute(&query, &args);
-        if res.is_ok() {
-            self.status = "Added..";
-        } else {
-            self.status = "Err adding..";
+        match res {
+            Ok(_) => {
+                self.status = Status::Ok("Added...");
+            }
+            Err(err) => {
+                self.status = Status::Error(("Err adding..", Some(err.to_string())));
+            }
         }
     }
 
@@ -862,10 +894,13 @@ impl ui::State<'_> {
         ];
 
         let res = STORAGE.lock().unwrap().execute(&query, &args);
-        if res.is_ok() {
-            self.status = "Added...";
-        } else {
-            self.status = "Err adding..";
+        match res {
+            Ok(_) => {
+                self.status = Status::Ok("Added...");
+            }
+            Err(err) => {
+                self.status = Status::Error(("Err adding..", Some(err.to_string())));
+            }
         }
     }
 
@@ -887,10 +922,13 @@ impl ui::State<'_> {
         ];
 
         let res = STORAGE.lock().unwrap().execute(&query, &args);
-        if res.is_ok() {
-            self.status = "Added...";
-        } else {
-            self.status = "Err adding..";
+        match res {
+            Ok(_) => {
+                self.status = Status::Ok("Added...");
+            }
+            Err(err) => {
+                self.status = Status::Error(("Err adding..", Some(err.to_string())));
+            }
         }
     }
 }

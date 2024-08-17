@@ -199,13 +199,13 @@ __   ___         _                           _
                 match response {
                     None => {
                         eprintln!("Cannot update ytui-music to latest version du to previous error.");
-                        eprintln!("To report this problem, you can file this issue in https://github.com/sudipghimire533/ytui-music/issues/");
+                        eprintln!("To report this problem, you can file this issue in https://github.com/grandkahuna43325/ytui-music/issues/");
                     }
                     Some(res) => {
                         let sucess = after_download(res).await;
                         if !sucess {
                             eprintln!("Cannot write ytui-music to destination. Update failed..");
-                            eprintln!("To report this problem, you can file this issue in https://github.com/sudipghimire533/ytui-music/issues/");
+                            eprintln!("To report this problem, you can file this issue in https://github.com/grandkahuna43325/ytui-music/issues/");
                         } else {
                             println!("Update sucess. Set executable permission if needed.");
                         }
@@ -218,7 +218,7 @@ __   ___         _                           _
         use reqwest::header;
 
         let assest_api_url =
-            "https://api.github.com/repos/sudipghimire533/ytui-music/releases/latest".to_string();
+            "https://api.github.com/repos/grandkahuna43325/ytui-music/releases/latest".to_string();
 
         let mut headers = header::HeaderMap::new();
         headers.insert(

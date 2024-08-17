@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 pub mod event;
 mod utils;
 use std::sync::Condvar;
@@ -248,6 +249,21 @@ pub fn draw_ui(state: &mut Arc<Mutex<State>>, cvar: &mut Arc<Condvar>) {
                 if let Window::Popup(title, ref content) = state_unlocked.active {
                     utils::show_pupop_text(screen, [title, content], &position.popup);
                 }
+
+                // Show this popup if there is an Error
+                // if hide_popup is true and error is different, show error anyway
+                if let Status::Error((_, Some(details))) = &state_unlocked.status.clone() {
+                    if state_unlocked.previous_error.as_deref() != Some(details) {
+                        state_unlocked.previous_error = Some(details.clone());
+                        state_unlocked.hide_popup = false;
+                    }
+
+                    if !state_unlocked.hide_popup {
+                        utils::show_popup(screen, ["Error", details], &position.popup);
+                    }
+                } else {
+                    state_unlocked.previous_error = None;
+                }
             })
             .unwrap();
     };
@@ -345,13 +361,32 @@ pub struct PlaybackBehaviour {
     volume: u8,
 }
 
+#[derive(Debug, Clone)]
+pub enum Status<'p> {
+    Ok(&'p str),
+    Error((&'p str, Option<String>)),
+}
+
+impl<'p> From<Status<'p>> for Cow<'p, str> {
+    fn from(status: Status<'p>) -> Self {
+        match status {
+            Status::Ok(s) => Cow::Borrowed(s),
+            Status::Error((s, _)) => Cow::Borrowed(s),
+        }
+    }
+}
+
 pub struct State<'p> {
     sidebar: ListState,
     bottom: BottomState,
 
     // String showing the status of player. This present status with single letter.
     // For example. `P` and `_` are used to indicate the player status of playing and paused.
-    pub status: &'p str,
+    // pub status: &'p str,
+    pub status: Status<'p>,
+
+    // For checking if the error changed :)
+    pub previous_error: Option<String>,
 
     // First memeber of tuple is the data being currently rendered in musicbar area and second is
     // that state of same list which define the hilighed item index.
@@ -388,4 +423,7 @@ pub struct State<'p> {
 
     // See documentation for respective struct
     pub playback_behaviour: PlaybackBehaviour,
+
+    // managing popup
+    pub hide_popup: bool,
 }

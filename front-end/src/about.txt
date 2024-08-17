@@ -33,7 +33,7 @@ rust: Empowering everyone to write efficient software. Well I'm empowered
 
 Liscening:
 This project is completly open source and so are all the dependencies used.
-For complete liscening refer to: https://github.com/sudipghimire533/ytui-music/blob/main/LICENSE.txt
+For complete liscening refer to: https://github.com/grandkahuna43325/ytui-music/blob/main/LICENSE.txt
 
 About author:
 I am Sudip Ghimire. When I started writing this tool back in August 2021, I was 12th grade student.
@@ -42,8 +42,8 @@ and also something useful instead of just some toy-project
 
 You own this as much as I do:
 Did you happen to like ytui-music? Why not give it a star on github and spread love.
-Github location: https://github.com/sudipghimire533/ytui-music
+Github location: https://github.com/grandkahuna43325/ytui-music
 You also love playing a bit with your keyboard? Help me to bring more improvement to it.
-Contributing guide: https://github.com/sudipghimire533/ytui-music/blob/main/CONTRIBUTING.md
+Contributing guide: https://github.com/grandkahuna43325/ytui-music/blob/main/CONTRIBUTING.md
 
 I Am happy you reached this far :)

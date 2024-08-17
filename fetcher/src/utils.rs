@@ -180,17 +180,17 @@ impl Fetcher {
 
         match res {
             Ok(response) => {
-                if let Ok(obj) = response.json::<Res>().await {
-                    Ok(obj)
-                } else {
-                    Err(ReturnAction::Failed)
+                match response.json::<Res>().await {
+                    Ok(obj) => Ok(obj),
+                    Err(err) => Err(ReturnAction::Failed(Some(err.to_string())))
+
                 }
             }
             Err(_) if retry_for > 0 => {
                 self.change_server();
                 Err(ReturnAction::Retry)
             }
-            Err(_) => Err(ReturnAction::Failed),
+            Err(err) => Err(ReturnAction::Failed(Some(err.to_string()))),
         }
     }
 
@@ -374,7 +374,7 @@ impl Fetcher {
                     "Error preparing select statement for favourates music. Error: {err}",
                     err = err
                 );
-                return Err(ReturnAction::Failed);
+                return Err(ReturnAction::Failed(Some(err.to_string())));
             }
         };
 
@@ -393,7 +393,7 @@ impl Fetcher {
                     "Cannot get results of favourates music. Error: {err}",
                     err = err
                 );
-                return Err(ReturnAction::Failed);
+                return Err(ReturnAction::Failed(Some(err.to_string())));
             }
             Ok(results) => {
                 let mut return_res: Vec<super::MusicUnit> = Vec::with_capacity(self.item_per_page);
@@ -438,7 +438,7 @@ impl Fetcher {
                     "Error preparing select statement for favourates playlist. Error: {err}",
                     err = err
                 );
-                return Err(ReturnAction::Failed);
+                return Err(ReturnAction::Failed(Some(err.to_string())));
             }
         };
 
@@ -457,7 +457,7 @@ impl Fetcher {
                     "Cannot get results of favourates music. Error: {err}",
                     err = err
                 );
-                return Err(ReturnAction::Failed);
+                return Err(ReturnAction::Failed(Some(err.to_string())));
             }
             Ok(results) => {
                 let mut return_res: Vec<super::PlaylistUnit> =
@@ -503,7 +503,7 @@ impl Fetcher {
                     "Error preparing select statement for favourates artist. Error: {err}",
                     err = err
                 );
-                return Err(ReturnAction::Failed);
+                return Err(ReturnAction::Failed(Some(err.to_string())));
             }
         };
 
@@ -521,7 +521,7 @@ impl Fetcher {
                     "Cannot get results of favourates artist. Error: {err}",
                     err = err
                 );
-                return Err(ReturnAction::Failed);
+                return Err(ReturnAction::Failed(Some(err.to_string())));
             }
             Ok(results) => {
                 let mut return_res: Vec<super::ArtistUnit> = Vec::with_capacity(self.item_per_page);

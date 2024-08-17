@@ -7,6 +7,8 @@ use std::{
     time::Duration,
 };
 
+use super::Status;
+
 pub const MIDDLE_MUSIC_INDEX: usize = 0;
 pub const MIDDLE_PLAYLIST_INDEX: usize = 1;
 pub const MIDDLE_ARTIST_INDEX: usize = 2;
@@ -254,6 +256,12 @@ pub async fn event_sender(
         notifier.notify_all();
     };
 
+    let hide_popup = || {
+        let mut state = state_original.lock().unwrap();
+        state.hide_popup = true;
+        notifier.notify_all();
+    };
+
     // This handler will be fired when user hits UP_ARROW or DOWN_ARROW key
     // UP_ARROW will set the direction to PREV and DOWN_ARROW to NEXT
     // for now, these key will only handle the moving of list
@@ -479,7 +487,7 @@ pub async fn event_sender(
             return;
         }
 
-        state.status = "Download started..";
+        state.status = Status::Ok("Download started..");
         state.active = ui::Window::Popup(
             "Downloading...",
             format!(
@@ -565,7 +573,7 @@ pub async fn event_sender(
                 state.playback_behaviour.volume = vol;
             }
             None => {
-                state.status = "Volume error..";
+                state.status = Status::Ok("Volume error..");
             }
         };
 
@@ -640,7 +648,7 @@ pub async fn event_sender(
     let handle_favourates = |add: bool| {
         let mut state = state_original.lock().unwrap();
 
-        state.status = "Processing..";
+        state.status = Status::Ok("Processing..");
 
         match state.active {
             ui::Window::Musicbar => {
@@ -655,7 +663,7 @@ pub async fn event_sender(
                         state.remove_music_from_favourates(unsafe { &*selected_music });
                     }
                 } else {
-                    state.status = "Nothing selected..";
+                    state.status = Status::Ok("Nothing selected..");
                 }
             }
 
@@ -669,7 +677,7 @@ pub async fn event_sender(
                         state.remove_playlist_from_favourates(unsafe { &*selected_playlist });
                     }
                 } else {
-                    state.status = "Nothing selected..";
+                    state.status = Status::Ok("Nothing selected..");
                 }
             }
 
@@ -683,7 +691,7 @@ pub async fn event_sender(
                         state.remove_artist_from_favourates(unsafe { &*selected_artist });
                     }
                 } else {
-                    state.status = "Nothing selected..";
+                    state.status = Status::Ok("Nothing selected..");
                 }
             }
             _ => {}
@@ -768,6 +776,8 @@ pub async fn event_sender(
                                 if quit(force_quit) {
                                     break 'listener_loop;
                                 }
+                            } else if ch == CONFIG.shortcut_keys.hide_popup {
+                                hide_popup();
                             }
                         }
                         _ => {}

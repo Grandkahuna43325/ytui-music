@@ -118,7 +118,7 @@ pub enum ReturnAction {
     // This variat indicates that the fetch has failed and cannot be resolved on retrying
     // This may be due to several reasons including server down, network failure, parse failure
     // Also Failed is active when fetcher had retried and now had exceed the retry count
-    Failed,
+    Failed(Option<String>),
     // This variant simply indicates that the request has failed but doing the same request for
     // another time may suceed
     Retry,
